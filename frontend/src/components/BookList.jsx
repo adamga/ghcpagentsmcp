@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { fetchBooks } from '../store/booksSlice';
 import { addFavorite, fetchFavorites } from '../store/favoritesSlice';
@@ -13,6 +13,7 @@ const BookList = () => {
   const token = useAppSelector(state => state.user.token);
   const navigate = useNavigate();
   const favorites = useAppSelector(state => state.favorites.items);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     if (!token) {
@@ -32,12 +33,39 @@ const BookList = () => {
     dispatch(fetchFavorites(token));
   };
 
+  const filteredBooks = useMemo(() => {
+    const normalizedSearch = searchTerm.trim().toLowerCase();
+
+    if (!normalizedSearch) {
+      return books;
+    }
+
+    return books.filter(book => (
+      book.title.toLowerCase().includes(normalizedSearch) ||
+      book.author.toLowerCase().includes(normalizedSearch)
+    ));
+  }, [books, searchTerm]);
+
   if (status === 'loading') return <div>Loading...</div>;
   if (status === 'failed') return <div>Failed to load books.</div>;
 
   return (
     <div>
       <h2>Books</h2>
+      <div className={styles.searchWrapper}>
+        <label htmlFor="book-search" className={styles.searchLabel}>
+          Search books
+        </label>
+        <input
+          id="book-search"
+          name="book-search"
+          className={styles.searchInput}
+          type="search"
+          value={searchTerm}
+          onChange={(event) => setSearchTerm(event.target.value)}
+          placeholder="Search by title or author"
+        />
+      </div>
       {books.length === 0 ? (
         <div style={{
           background: '#fff',
@@ -52,9 +80,14 @@ const BookList = () => {
           <p>No books available.</p>
           <p>Check back later or add a new book if you have permission.</p>
         </div>
+      ) : filteredBooks.length === 0 ? (
+        <div className={styles.emptyState}>
+          <p>No books match your search.</p>
+          <p>Try searching by a different title or author.</p>
+        </div>
       ) : (
         <div className={styles.bookGrid}>
-          {books.map(book => {
+          {filteredBooks.map(book => {
             const isFavorite = favorites.some(fav => fav.id === book.id);
             return (
               <div className={styles.bookCard + ' ' + styles.bookCardWithHeart} key={book.id}>

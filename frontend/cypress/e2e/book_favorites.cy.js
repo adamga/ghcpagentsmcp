@@ -36,6 +36,22 @@ describe('Book Favorites App', () => {
     cy.get('h2').contains('My Favorite Books').should('exist');
   });
 
+  it('should search books by title and author', () => {
+    cy.contains('Login').click();
+    cy.get('input[name="username"]').type(user.username);
+    cy.get('input[name="password"]').type(user.password);
+    cy.get('button#login').click();
+    cy.contains('Books').click();
+    cy.get('input[name="book-search"]').type('gatsby');
+    cy.contains('The Great Gatsby').should('exist');
+    cy.contains('To Kill a Mockingbird').should('not.exist');
+    cy.get('input[name="book-search"]').clear().type('harper lee');
+    cy.contains('To Kill a Mockingbird').should('exist');
+    cy.contains('The Great Gatsby').should('not.exist');
+    cy.get('input[name="book-search"]').clear().type('no matching book');
+    cy.contains('No books match your search.').should('exist');
+  });
+
   it('should logout and protect routes', () => {
     // Login first
     cy.contains('Login').click();
