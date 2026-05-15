@@ -13,7 +13,7 @@ cleanup() {
 trap cleanup EXIT
 
 export TEST_MODE=1
-export JWT_SECRET="${JWT_SECRET:-test_secret}"
+export JWT_SECRET="${JWT_SECRET:-$(node -e "console.log(require('crypto').randomBytes(64).toString('hex'))")}"
 bash backend/tests/copy-test-data.sh
 
 (cd backend && node server.js) &

@@ -1,4 +1,5 @@
 const express = require('express');
+// generated-by-copilot: Keep demo responses bounded if the catalog grows beyond the current sample data.
 const DEFAULT_BOOK_LIMIT = 100;
 
 function normalizeQuery(value) {

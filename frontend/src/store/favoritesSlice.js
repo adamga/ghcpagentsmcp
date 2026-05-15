@@ -9,7 +9,7 @@ export const fetchFavorites = createAsyncThunk('favorites/fetchFavorites', async
   return res.json();
 });
 
-export const addFavorite = createAsyncThunk('favorites/addFavorite', async ({ token, bookId }) => {
+export const addFavorite = createAsyncThunk('favorites/addFavorite', async ({ token, bookId }, { rejectWithValue }) => {
   const res = await fetch(`${API_BASE_URL}/favorites`, {
     method: 'POST',
     headers: {
@@ -19,7 +19,7 @@ export const addFavorite = createAsyncThunk('favorites/addFavorite', async ({ to
     body: JSON.stringify({ bookId }),
   });
   if (res.status === 409) {
-    return { duplicate: true };
+    return rejectWithValue('Book is already in favorites.');
   }
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
@@ -70,9 +70,12 @@ const favoritesSlice = createSlice({
         state.status = 'failed';
         state.error = action.error.message;
       })
-      .addCase(addFavorite.fulfilled, (state, action) => {
+      .addCase(addFavorite.fulfilled, (state) => {
         state.status = 'succeeded';
-        state.error = action.payload?.duplicate ? 'Book is already in favorites.' : null;
+        state.error = null;
+      })
+      .addCase(addFavorite.rejected, (state, action) => {
+        state.error = action.payload || action.error.message;
       })
       .addCase(removeFavorite.fulfilled, (state, action) => {
         state.items = state.items.filter(book => book.id !== action.payload);

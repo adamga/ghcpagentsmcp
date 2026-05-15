@@ -1,6 +1,7 @@
 const express = require('express');
 const rateLimit = require('express-rate-limit');
 
+// generated-by-copilot: Allow normal favorite updates while throttling accidental or scripted mutation bursts.
 const favoriteMutationLimiter = rateLimit({
   windowMs: 60 * 1000,
   limit: 30,

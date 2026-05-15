@@ -32,6 +32,10 @@
 .simpleBtn:hover {
   background: #178d8d;
 }
+.simpleBtn:focus-visible {
+  outline: 3px solid #0b5fff;
+  outline-offset: 2px;
+}
 .simpleBtn:disabled {
   background: #8aa;
   cursor: not-allowed;
