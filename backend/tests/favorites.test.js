@@ -36,6 +36,11 @@ app.use('/api', createApiRouter({
 }));
 
 describe('Favorites API', () => {
+  beforeEach(() => {
+    fs.copyFileSync(path.join(__dirname, '../data/users.json'), usersFile);
+    fs.copyFileSync(path.join(__dirname, '../data/books.json'), booksFile);
+  });
+
   it('GET /api/favorites should fail without auth', async () => {
     const res = await request(app).get('/api/favorites');
     expect(res.statusCode).toBe(401);
@@ -70,11 +75,12 @@ describe('Favorites API', () => {
       .post('/api/favorites')
       .set('Authorization', `Bearer ${token}`)
       .send({ bookId: notFav.id });
-    expect(res.statusCode).toBe(200);
+    expect(res.statusCode).toBe(201);
     expect(res.body.message).toMatch(/added/);
+    expect(res.body.book.id).toBe(notFav.id);
   });
 
-  it('POST /api/favorites should not duplicate favorites', async () => {
+  it('POST /api/favorites should reject duplicate favorites', async () => {
     const token = getToken('sandra');
     const users = JSON.parse(fs.readFileSync(usersFile, 'utf-8'));
     const sandra = users.find(u => u.username === 'sandra');
@@ -83,8 +89,8 @@ describe('Favorites API', () => {
       .post('/api/favorites')
       .set('Authorization', `Bearer ${token}`)
       .send({ bookId: alreadyFav });
-    expect(res.statusCode).toBe(200);
-    expect(res.body.message).toMatch(/added/);
+    expect(res.statusCode).toBe(409);
+    expect(res.body.message).toMatch(/already/);
   });
 
   it('POST /api/favorites should fail with missing bookId', async () => {
@@ -103,6 +109,58 @@ describe('Favorites API', () => {
       .set('Authorization', `Bearer ${token}`)
       .send({ bookId: '1' });
     expect(res.statusCode).toBe(404);
+  });
+
+  it('POST /api/favorites should 404 for an unknown book', async () => {
+    const token = getToken('sandra');
+    const res = await request(app)
+      .post('/api/favorites')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ bookId: 'unknown-book' });
+    expect(res.statusCode).toBe(404);
+    expect(res.body.message).toMatch(/Book not found/);
+  });
+
+  it('DELETE /api/favorites/:bookId should remove a favorite', async () => {
+    const token = getToken('sandra');
+    const users = JSON.parse(fs.readFileSync(usersFile, 'utf-8'));
+    const sandra = users.find(u => u.username === 'sandra');
+    const alreadyFav = sandra.favorites[0];
+    const res = await request(app)
+      .delete(`/api/favorites/${alreadyFav}`)
+      .set('Authorization', `Bearer ${token}`);
+    expect(res.statusCode).toBe(200);
+
+    const updatedUsers = JSON.parse(fs.readFileSync(usersFile, 'utf-8'));
+    const updatedSandra = updatedUsers.find(u => u.username === 'sandra');
+    expect(updatedSandra.favorites).not.toContain(alreadyFav);
+  });
+
+  it('DELETE /api/favorites should clear all favorites', async () => {
+    const token = getToken('sandra');
+    const res = await request(app)
+      .delete('/api/favorites')
+      .set('Authorization', `Bearer ${token}`);
+    expect(res.statusCode).toBe(200);
+
+    const updatedUsers = JSON.parse(fs.readFileSync(usersFile, 'utf-8'));
+    const updatedSandra = updatedUsers.find(u => u.username === 'sandra');
+    expect(updatedSandra.favorites).toEqual([]);
+  });
+
+  it('GET /api/favorites should fail with expired token', async () => {
+    const token = jwt.sign({ username: 'sandra' }, SECRET_KEY, { expiresIn: '-1s' });
+    const res = await request(app)
+      .get('/api/favorites')
+      .set('Authorization', `Bearer ${token}`);
+    expect(res.statusCode).toBe(403);
+  });
+
+  it('GET /api/favorites should fail with malformed token', async () => {
+    const res = await request(app)
+      .get('/api/favorites')
+      .set('Authorization', 'Bearer not-a-token');
+    expect(res.statusCode).toBe(403);
   });
 
   it('POST /api/favorites should fail without auth', async () => {

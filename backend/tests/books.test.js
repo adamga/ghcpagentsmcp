@@ -18,8 +18,25 @@ describe('Books API', () => {
   it('GET /api/books should return a list of books', async () => {
     const res = await request(app).get('/api/books');
     expect(res.statusCode).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
-    expect(res.body.length).toBeGreaterThan(0);
+    expect(Array.isArray(res.body.items)).toBe(true);
+    expect(res.body.items.length).toBeGreaterThan(0);
+    expect(res.body.total).toBeGreaterThan(0);
+  });
+
+  it('GET /api/books should search by title or author', async () => {
+    const res = await request(app).get('/api/books?search=orwell');
+    expect(res.statusCode).toBe(200);
+    expect(res.body.items.length).toBeGreaterThan(0);
+    expect(res.body.items.every(book => `${book.title} ${book.author}`.toLowerCase().includes('orwell'))).toBe(true);
+  });
+
+  it('GET /api/books should sort and paginate results', async () => {
+    const res = await request(app).get('/api/books?sort=title&order=desc&page=1&limit=2');
+    expect(res.statusCode).toBe(200);
+    expect(res.body.items).toHaveLength(2);
+    expect(res.body.page).toBe(1);
+    expect(res.body.limit).toBe(2);
+    expect(res.body.items[0].title.localeCompare(res.body.items[1].title)).toBeGreaterThanOrEqual(0);
   });
 
   it('POST /api/books should not be allowed', async () => {

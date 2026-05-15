@@ -20,6 +20,20 @@ This document quickly describes the content of the hands-on workshop. It is writ
 
 Everything is descripted step by step before each exercise.
 
+## Setup check
+
+Before starting the hands-on exercises, run:
+
+```bash
+npm run setup
+cp .env.example .env
+cp frontend/.env.example frontend/.env
+npm run test:backend
+npm run build:frontend && npm run test:frontend
+```
+
+If tests fail because ports are already in use, stop any existing backend or frontend development servers and rerun the commands.
+
 ## Part 1: GitHub Copilot Cloud Agent (15-20 minutes)
 
 ### Exercise 1: Basic Feature Addition

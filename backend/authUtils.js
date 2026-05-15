@@ -1,0 +1,59 @@
+const crypto = require('crypto');
+
+const PASSWORD_ITERATIONS = 120000;
+const PASSWORD_KEY_LENGTH = 64;
+const PASSWORD_DIGEST = 'sha512';
+
+function normalizeCredential(value) {
+  return typeof value === 'string' ? value.trim() : '';
+}
+
+function validateCredentials(username, password) {
+  const normalizedUsername = normalizeCredential(username);
+  if (normalizedUsername.length < 3 || normalizedUsername.length > 40) {
+    return { valid: false, message: 'Username must be between 3 and 40 characters' };
+  }
+  if (!/^[A-Za-z0-9_-]+$/.test(normalizedUsername)) {
+    return { valid: false, message: 'Username can only include letters, numbers, underscores, and hyphens' };
+  }
+  if (typeof password !== 'string' || password.length < 6 || password.length > 128) {
+    return { valid: false, message: 'Password must be between 6 and 128 characters' };
+  }
+  return { valid: true, username: normalizedUsername };
+}
+
+function hashPassword(password) {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = crypto.pbkdf2Sync(password, salt, PASSWORD_ITERATIONS, PASSWORD_KEY_LENGTH, PASSWORD_DIGEST).toString('hex');
+  return {
+    passwordHash: hash,
+    passwordSalt: salt,
+    passwordIterations: PASSWORD_ITERATIONS,
+    passwordDigest: PASSWORD_DIGEST,
+  };
+}
+
+function verifyPassword(password, user) {
+  if (!user.passwordHash || !user.passwordSalt) {
+    return user.password === password;
+  }
+
+  const iterations = user.passwordIterations || PASSWORD_ITERATIONS;
+  const digest = user.passwordDigest || PASSWORD_DIGEST;
+  const expected = Buffer.from(user.passwordHash, 'hex');
+  const actual = crypto.pbkdf2Sync(password, user.passwordSalt, iterations, expected.length, digest);
+
+  return expected.length === actual.length && crypto.timingSafeEqual(expected, actual);
+}
+
+function removePlaintextPassword(user) {
+  const { password, ...safeUser } = user;
+  return safeUser;
+}
+
+module.exports = {
+  hashPassword,
+  removePlaintextPassword,
+  validateCredentials,
+  verifyPassword,
+};

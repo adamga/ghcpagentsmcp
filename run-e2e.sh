@@ -4,6 +4,8 @@
 
 # Start backend in test mode
 export TEST_MODE=1
+export JWT_SECRET="${JWT_SECRET:-test_secret}"
+bash backend/tests/copy-test-data.sh
 npm run start:backend &
 BACKEND_PID=$!
 

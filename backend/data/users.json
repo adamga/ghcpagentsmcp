@@ -1,7 +1,6 @@
 [
   {
     "username": "sandra",
-    "password": "sandra",
     "favorites": [
       "1",
       "2",
@@ -14,6 +13,10 @@
       "14",
       "20",
       "21"
-    ]
+    ],
+    "passwordHash": "f020a84c7ba5df8be0dfcb9f56aa99a80c6a1194389240ee9f095ff8d722f73a2bab2c79d9245e84fb5afd356e3aaa943a0375ae1a02b834450520a381fce932",
+    "passwordSalt": "d58e76cb3fd65c0b90b205192bda53c7",
+    "passwordIterations": 120000,
+    "passwordDigest": "sha512"
   }
 ]

@@ -15,6 +15,19 @@ This document quickly describes the content of the demo. It is written for the e
 
 Everything is descripted step by step before each exercise.
 
+## Recommended demo path
+
+1. Start with Demo 1 to establish the application and Cloud Agent workflow.
+2. Continue with Demo 2 to show a larger feature crossing frontend, backend, and tests.
+3. Use Demo 3 to compare local Agent Mode with Cloud Agent.
+4. Introduce MCP in Demo 4 and Demo 5, including how external context changes the agent workflow.
+5. Use Demo 6 and Demo 7 for advanced customization with hooks and skills.
+6. Finish with Demo 8 to show Copilot CLI repository exploration from the terminal.
+
+## Intentional training gaps
+
+Some exercises intentionally begin from a simple or incomplete implementation so Copilot has meaningful work to perform. The Book Favorites app now includes baseline hardening and favorite-management features, but the training path can still use targeted issues for search refinements, reviews, deployment, persistence, and additional security improvements.
+
 ## Part 1: GitHub Copilot Cloud Agent
 
 - [Demo 1: Using GitHub Copilot Cloud Agent to add a (basic) new feature](01-coding-agent-basic.md)

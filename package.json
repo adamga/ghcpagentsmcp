@@ -5,7 +5,9 @@
   "scripts": {
     "start:backend": "cd backend && node server.js",
     "start:frontend": "cd frontend && npm run dev",
+    "setup": "npm install && cd frontend && npm install",
     "build:frontend": "cd frontend && npm run build",
+    "lint:frontend": "cd frontend && npm run lint",
     "test:frontend": "bash run-e2e.sh",
     "test:backend": "bash backend/tests/copy-test-data.sh && cd backend && npx jest",
     "test": "npm run test:frontend && npm run test:backend"

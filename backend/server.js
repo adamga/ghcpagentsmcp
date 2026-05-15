@@ -4,10 +4,11 @@ const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const app = express();
 const PORT = 4000;
-const SECRET_KEY = 'your_jwt_secret';
+const SECRET_KEY = process.env.JWT_SECRET || crypto.randomBytes(64).toString('hex');
 
 app.use(cors());
 app.use(bodyParser.json());

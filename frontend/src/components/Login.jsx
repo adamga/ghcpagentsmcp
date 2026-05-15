@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAppDispatch } from '../store/hooks';
 import { setUser } from '../store/userSlice';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../config/api';
 
 const Login = () => {
   const [username, setUsername] = useState('');
@@ -14,14 +15,13 @@ const Login = () => {
     e.preventDefault();
     setError('');
     try {
-      const res = await fetch('http://localhost:4000/api/login', {
+      const res = await fetch(`${API_BASE_URL}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Login failed');
-      // Username and token are now stored in Redux and localStorage by setUser
       dispatch(setUser({ token: data.token, username }));
       navigate('/favorites');
     } catch (err) {

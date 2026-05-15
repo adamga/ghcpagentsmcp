@@ -1,20 +1,36 @@
-describe('Book Favorites App', () => {
-  // generate a random username and password for the e2e tests
-  const username = `e2euser${Math.floor(Math.random() * 1000)}`;
-  const password = `e2epass${Math.floor(Math.random() * 1000)}`;
-  const user = { username, password };
+const makeUser = (label) => ({
+  username: `${label}${Date.now()}${Math.floor(Math.random() * 1000)}`,
+  password: `pass-${label}-123`,
+});
 
+const registerUser = (user) => {
+  cy.request({
+    method: 'POST',
+    url: 'http://localhost:4000/api/register',
+    body: user,
+    failOnStatusCode: false,
+  });
+};
+
+const loginUser = (user) => {
+  cy.contains('Login').click();
+  cy.get('input[name="username"]').type(user.username);
+  cy.get('input[name="password"]').type(user.password);
+  cy.get('button#login').click();
+};
+
+describe('Book Favorites App', () => {
   beforeEach(() => {
     cy.visit('http://localhost:5173');
   });
 
   it('should allow a new user to register and login', () => {
+    const user = makeUser('register');
     cy.contains('Create Account').click();
     cy.get('input[name="username"]').type(user.username);
     cy.get('input[name="password"]').type(user.password);
     cy.get('button#register').click();
     cy.contains('Registration successful! You can now log in.').should('exist');
-    // wait for a bit to ensure the success message is visible
     cy.wait(2000);
     cy.get('input[name="username"]').type(user.username);
     cy.get('input[name="password"]').type(user.password);
@@ -23,25 +39,43 @@ describe('Book Favorites App', () => {
     cy.contains('Favorites').should('exist');
   });
 
-  it('should show books and allow adding to favorites', () => {
-    // Login first
-    cy.contains('Login').click();
-    cy.get('input[name="username"]').type(user.username);
-    cy.get('input[name="password"]').type(user.password);
-    cy.get('button#login').click();
+  it('should search, sort, and add a book to favorites', () => {
+    const user = makeUser('books');
+    registerUser(user);
+    loginUser(user);
     cy.contains('Books').click();
     cy.contains('h2', 'Books').should('exist');
+    cy.get('input[name="book-search"]').type('orwell');
+    cy.contains('George Orwell').should('exist');
+    cy.get('select').select('Author');
     cy.get('button').contains('Add to Favorites').first().click();
+    cy.get('button').contains('In Favorites').should('be.disabled');
     cy.get('a#favorites-link').click();
     cy.get('h2').contains('My Favorite Books').should('exist');
+    cy.contains('George Orwell').should('exist');
+  });
+
+  it('should remove and clear favorites', () => {
+    const user = makeUser('favorites');
+    registerUser(user);
+    loginUser(user);
+    cy.contains('Books').click();
+    cy.get('button').contains('Add to Favorites').first().click();
+    cy.get('a#favorites-link').click();
+    cy.get('button').contains('Remove').click();
+    cy.contains('No favorite books yet.').should('exist');
+    cy.get('a#books-link').click();
+    cy.get('button').contains('Add to Favorites').first().click();
+    cy.get('button').contains('Add to Favorites').first().click();
+    cy.get('a#favorites-link').click();
+    cy.get('button').contains('Clear All Favorites').click();
+    cy.contains('No favorite books yet.').should('exist');
   });
 
   it('should logout and protect routes', () => {
-    // Login first
-    cy.contains('Login').click();
-    cy.get('input[name="username"]').type(user.username);
-    cy.get('input[name="password"]').type(user.password);
-    cy.get('button#login').click();
+    const user = makeUser('logout');
+    registerUser(user);
+    loginUser(user);
     cy.get('button#logout').click();
     cy.contains('Login').should('exist');
     cy.visit('http://localhost:5173/books');

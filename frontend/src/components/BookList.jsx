@@ -1,10 +1,11 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { fetchBooks } from '../store/booksSlice';
 import { addFavorite, fetchFavorites } from '../store/favoritesSlice';
 import { useNavigate } from 'react-router-dom';
 import styles from '../styles/BookList.module.css';
+import EmptyState from './EmptyState';
 
 const BookList = () => {
   const dispatch = useAppDispatch();
@@ -13,15 +14,17 @@ const BookList = () => {
   const token = useAppSelector(state => state.user.token);
   const navigate = useNavigate();
   const favorites = useAppSelector(state => state.favorites.items);
+  const [search, setSearch] = useState('');
+  const [sort, setSort] = useState('title');
 
   useEffect(() => {
     if (!token) {
       navigate('/');
       return;
     }
-    dispatch(fetchBooks());
+    dispatch(fetchBooks({ search, sort, order: 'asc' }));
     dispatch(fetchFavorites(token));
-  }, [dispatch, token, navigate]);
+  }, [dispatch, token, navigate, search, sort]);
 
   const handleAddFavorite = async (bookId) => {
     if (!token) {
@@ -32,26 +35,36 @@ const BookList = () => {
     dispatch(fetchFavorites(token));
   };
 
-  if (status === 'loading') return <div>Loading...</div>;
   if (status === 'failed') return <div>Failed to load books.</div>;
 
   return (
     <div>
       <h2>Books</h2>
+      <div className={styles.toolbar}>
+        <label>
+          Search
+          <input
+            name="book-search"
+            type="search"
+            placeholder="Search by title or author"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+        </label>
+        <label>
+          Sort by
+          <select value={sort} onChange={e => setSort(e.target.value)}>
+            <option value="title">Title</option>
+            <option value="author">Author</option>
+          </select>
+        </label>
+      </div>
+      {status === 'loading' && <div className={styles.status}>Loading...</div>}
       {books.length === 0 ? (
-        <div style={{
-          background: '#fff',
-          padding: '2rem',
-          borderRadius: '8px',
-          maxWidth: '400px',
-          margin: '2rem auto',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-          textAlign: 'center',
-          color: '#888',
-        }}>
+        <EmptyState>
           <p>No books available.</p>
-          <p>Check back later or add a new book if you have permission.</p>
-        </div>
+          <p>Try another search or check back later.</p>
+        </EmptyState>
       ) : (
         <div className={styles.bookGrid}>
           {books.map(book => {
@@ -70,6 +83,7 @@ const BookList = () => {
                 <button
                   className={styles.simpleBtn}
                   onClick={() => handleAddFavorite(book.id)}
+                  disabled={isFavorite}
                 >
                   {isFavorite ? 'In Favorites' : 'Add to Favorites'}
                 </button>

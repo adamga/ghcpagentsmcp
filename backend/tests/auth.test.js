@@ -24,7 +24,6 @@ describe('Auth API', () => {
 
   it('POST /api/register should succeed with valid data', async () => {
     const res = await request(app).post('/api/register').send(testUser);
-    // 201 or 409 if already exists
     expect([201, 409]).toContain(res.statusCode);
   });
 
@@ -48,6 +47,11 @@ describe('Auth API', () => {
 
   it('POST /api/login should fail with missing fields', async () => {
     const res = await request(app).post('/api/login').send({ username: '' });
-    expect(res.statusCode).toBe(401);
+    expect(res.statusCode).toBe(400);
+  });
+
+  it('POST /api/register should reject weak credentials', async () => {
+    const res = await request(app).post('/api/register').send({ username: 'ab', password: '123' });
+    expect(res.statusCode).toBe(400);
   });
 });

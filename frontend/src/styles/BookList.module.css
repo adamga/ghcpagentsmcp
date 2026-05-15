@@ -32,6 +32,36 @@
 .simpleBtn:hover {
   background: #178d8d;
 }
+.simpleBtn:disabled {
+  background: #8aa;
+  cursor: not-allowed;
+}
+.toolbar {
+  align-items: flex-end;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  display: flex;
+  gap: 1rem;
+  margin: 1rem auto 2rem;
+  max-width: 900px;
+  padding: 1rem;
+}
+.toolbar label {
+  color: #333;
+  flex: 1;
+  font-weight: 600;
+}
+.toolbar input,
+.toolbar select {
+  box-sizing: border-box;
+  margin-top: 0.5rem;
+  width: 100%;
+}
+.status {
+  color: #555;
+  text-align: center;
+}
 .heartBtn:focus,
 .heartBtn:focus-visible,
 .heartBtn:active {
