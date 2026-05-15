@@ -30,10 +30,7 @@ const favoritesSlice = createSlice({
         state.status = 'succeeded';
         state.items = action.payload;
       })
-      .addCase(fetchFavorites.rejected, state => { state.status = 'failed'; })
-      .addCase(addFavorite.fulfilled, (state, action) => {
-        // After adding, fetch the updated favorites list to ensure UI is in sync
-      });
+      .addCase(fetchFavorites.rejected, state => { state.status = 'failed'; });
   },
 });
 
