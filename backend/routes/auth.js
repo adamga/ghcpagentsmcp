@@ -44,7 +44,7 @@ function createAuthRouter({ usersFile, readJSON, writeJSON, SECRET_KEY }) {
     }
 
     const token = jwt.sign({ username: normalizedUsername }, SECRET_KEY, { expiresIn: '1h' });
-    res.json({ token });
+    res.json({ token, username: normalizedUsername });
   });
 
   return router;

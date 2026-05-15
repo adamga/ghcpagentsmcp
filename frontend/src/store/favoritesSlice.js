@@ -18,11 +18,14 @@ export const addFavorite = createAsyncThunk('favorites/addFavorite', async ({ to
     },
     body: JSON.stringify({ bookId }),
   });
-  if (!res.ok && res.status !== 409) {
+  if (res.status === 409) {
+    return { duplicate: true };
+  }
+  if (!res.ok) {
     const data = await res.json().catch(() => ({}));
     throw new Error(data.message || 'Failed to add favorite');
   }
-  return res.status === 409 ? null : res.json();
+  return res.json();
 });
 
 export const removeFavorite = createAsyncThunk('favorites/removeFavorite', async ({ token, bookId }) => {
@@ -51,24 +54,33 @@ export const clearFavorites = createAsyncThunk('favorites/clearFavorites', async
 
 const favoritesSlice = createSlice({
   name: 'favorites',
-  initialState: { items: [], status: 'idle' },
+  initialState: { items: [], status: 'idle', error: null },
   reducers: {},
   extraReducers: builder => {
     builder
-      .addCase(fetchFavorites.pending, state => { state.status = 'loading'; })
+      .addCase(fetchFavorites.pending, state => {
+        state.status = 'loading';
+        state.error = null;
+      })
       .addCase(fetchFavorites.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.items = action.payload;
       })
-      .addCase(fetchFavorites.rejected, state => { state.status = 'failed'; })
-      .addCase(addFavorite.fulfilled, (state) => {
+      .addCase(fetchFavorites.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.error.message;
+      })
+      .addCase(addFavorite.fulfilled, (state, action) => {
         state.status = 'succeeded';
+        state.error = action.payload?.duplicate ? 'Book is already in favorites.' : null;
       })
       .addCase(removeFavorite.fulfilled, (state, action) => {
         state.items = state.items.filter(book => book.id !== action.payload);
+        state.error = null;
       })
       .addCase(clearFavorites.fulfilled, (state) => {
         state.items = [];
+        state.error = null;
       });
   },
 });

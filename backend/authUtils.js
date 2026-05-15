@@ -40,6 +40,7 @@ function hashPassword(password) {
 function verifyPassword(password, user) {
   if (!user.passwordHash || !user.passwordSalt) {
     if (typeof user.password !== 'string' || typeof password !== 'string') return false;
+    console.warn(`Plaintext password format detected for user "${user.username}"; record will be migrated after successful login.`);
     const expected = Buffer.from(user.password);
     const actual = Buffer.from(password);
     return expected.length === actual.length && crypto.timingSafeEqual(expected, actual);

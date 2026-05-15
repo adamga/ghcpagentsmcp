@@ -22,7 +22,7 @@ const Login = () => {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Login failed');
-      dispatch(setUser({ token: data.token, username }));
+      dispatch(setUser({ token: data.token, username: data.username || username.trim() }));
       navigate('/favorites');
     } catch (err) {
       setError(err.message);

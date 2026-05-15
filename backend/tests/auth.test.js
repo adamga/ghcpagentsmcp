@@ -38,6 +38,7 @@ describe('Auth API', () => {
     const res = await request(app).post('/api/login').send(testUser);
     expect(res.statusCode).toBe(200);
     expect(res.body.token).toBeDefined();
+    expect(res.body.username).toBe(testUser.username);
   });
 
   it('POST /api/login should fail with wrong password', async () => {

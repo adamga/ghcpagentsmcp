@@ -14,6 +14,7 @@ const BookList = () => {
   const token = useAppSelector(state => state.user.token);
   const navigate = useNavigate();
   const favorites = useAppSelector(state => state.favorites.items);
+  const favoriteError = useAppSelector(state => state.favorites.error);
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState('title');
   const [order, setOrder] = useState('asc');
@@ -68,6 +69,7 @@ const BookList = () => {
         </label>
       </div>
       {status === 'loading' && <div className={styles.status}>Loading...</div>}
+      {favoriteError && <div className={styles.status} role="alert">{favoriteError}</div>}
       {books.length === 0 ? (
         <EmptyState>
           <p>No books available.</p>
@@ -93,7 +95,6 @@ const BookList = () => {
                   onClick={() => handleAddFavorite(book.id)}
                   disabled={isFavorite}
                   aria-label={isFavorite ? `${book.title} is already in favorites` : `Add ${book.title} to favorites`}
-                  title={isFavorite ? 'Already in favorites' : 'Add to favorites'}
                 >
                   {isFavorite ? 'In Favorites' : 'Add to Favorites'}
                 </button>

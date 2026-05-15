@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config/api';
 
+const REDIRECT_DELAY_MS = 2000;
+
 const Register = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -24,7 +26,7 @@ const Register = () => {
       setSuccess('Registration successful! You can now log in.');
       setTimeout(() => {
         navigate('/login');
-      }, 2000);
+      }, REDIRECT_DELAY_MS);
     } catch (err) {
       setError(err.message);
     }
