@@ -1,28 +1,31 @@
 #!/bin/bash
-# Start backend and frontend in background, run Cypress, then kill servers
+set -e
 
+cleanup() {
+  if [ -n "$BACKEND_PID" ] && kill -0 "$BACKEND_PID" 2>/dev/null; then
+    kill "$BACKEND_PID"
+  fi
+  if [ -n "$FRONTEND_PID" ] && kill -0 "$FRONTEND_PID" 2>/dev/null; then
+    kill "$FRONTEND_PID"
+  fi
+}
 
-# Start backend in test mode
+trap cleanup EXIT
+
 export TEST_MODE=1
 export JWT_SECRET="${JWT_SECRET:-test_secret}"
 bash backend/tests/copy-test-data.sh
-npm run start:backend &
+
+(cd backend && node server.js) &
 BACKEND_PID=$!
 
-# Start frontend
-cd frontend && npm run dev &
+(cd frontend && ./node_modules/.bin/vite --host 0.0.0.0 --strictPort) &
 FRONTEND_PID=$!
 
-# Wait for servers to be ready
 sleep 5
 
-# Run Cypress tests
 cd frontend && npx cypress run
 TEST_RESULT=$?
 cd ..
-
-# Kill servers
-kill $BACKEND_PID
-kill $FRONTEND_PID
 
 exit $TEST_RESULT

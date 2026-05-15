@@ -1,6 +1,6 @@
 const makeUser = (label) => ({
   username: `${label}${Date.now()}${Math.floor(Math.random() * 1000)}`,
-  password: `pass-${label}-123`,
+  password: `Pass-${label}-${Math.random().toString(36).slice(2)}!`,
 });
 
 const registerUser = (user) => {

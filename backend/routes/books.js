@@ -1,4 +1,5 @@
 const express = require('express');
+const DEFAULT_BOOK_LIMIT = 100;
 
 function normalizeQuery(value) {
   return typeof value === 'string' ? value.trim().toLowerCase() : '';
@@ -18,7 +19,7 @@ function createBooksRouter({ booksFile, readJSON }) {
     const sort = ['title', 'author'].includes(req.query.sort) ? req.query.sort : null;
     const order = req.query.order === 'desc' ? 'desc' : 'asc';
     const page = parsePositiveInteger(req.query.page, 1);
-    const limit = parsePositiveInteger(req.query.limit, books.length || 1);
+    const limit = parsePositiveInteger(req.query.limit, DEFAULT_BOOK_LIMIT);
 
     if (search) {
       books = books.filter(book =>

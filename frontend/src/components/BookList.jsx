@@ -84,6 +84,8 @@ const BookList = () => {
                   className={styles.simpleBtn}
                   onClick={() => handleAddFavorite(book.id)}
                   disabled={isFavorite}
+                  aria-label={isFavorite ? `${book.title} is already in favorites` : `Add ${book.title} to favorites`}
+                  title={isFavorite ? 'Already in favorites' : 'Add to favorites'}
                 >
                   {isFavorite ? 'In Favorites' : 'Add to Favorites'}
                 </button>

@@ -1,4 +1,12 @@
 const express = require('express');
+const rateLimit = require('express-rate-limit');
+
+const favoriteMutationLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 30,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+});
 
 function findUser(users, username) {
   return users.find(u => u.username === username);
@@ -16,11 +24,11 @@ function createFavoritesRouter({ usersFile, booksFile, readJSON, writeJSON, auth
     const user = findUser(users, req.user.username);
     if (!user) return res.status(404).json({ message: 'User not found' });
     const books = readJSON(booksFile);
-    const favorites = books.filter(b => user.favorites.indexOf(b.id) !== -1);
+    const favorites = books.filter(b => user.favorites.includes(b.id));
     res.json(favorites);
   });
 
-  router.post('/', authenticateToken, (req, res) => {
+  router.post('/', favoriteMutationLimiter, authenticateToken, (req, res) => {
     const { bookId } = req.body;
     if (!bookId) return res.status(400).json({ message: 'Book ID required' });
     const users = readJSON(usersFile);
@@ -29,7 +37,7 @@ function createFavoritesRouter({ usersFile, booksFile, readJSON, writeJSON, auth
     const books = readJSON(booksFile);
     const book = findBook(books, bookId);
     if (!book) return res.status(404).json({ message: 'Book not found' });
-    if (user.favorites.indexOf(bookId) !== -1) {
+    if (user.favorites.includes(bookId)) {
       return res.status(409).json({ message: 'Book already in favorites' });
     }
     user.favorites.push(bookId);
@@ -37,7 +45,7 @@ function createFavoritesRouter({ usersFile, booksFile, readJSON, writeJSON, auth
     res.status(201).json({ message: 'Book added to favorites', book });
   });
 
-  router.delete('/', authenticateToken, (req, res) => {
+  router.delete('/', favoriteMutationLimiter, authenticateToken, (req, res) => {
     const users = readJSON(usersFile);
     const user = findUser(users, req.user.username);
     if (!user) return res.status(404).json({ message: 'User not found' });
@@ -46,7 +54,7 @@ function createFavoritesRouter({ usersFile, booksFile, readJSON, writeJSON, auth
     res.status(200).json({ message: 'Favorites cleared' });
   });
 
-  router.delete('/:bookId', authenticateToken, (req, res) => {
+  router.delete('/:bookId', favoriteMutationLimiter, authenticateToken, (req, res) => {
     const users = readJSON(usersFile);
     const user = findUser(users, req.user.username);
     if (!user) return res.status(404).json({ message: 'User not found' });
