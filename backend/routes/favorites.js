@@ -34,12 +34,12 @@ function createFavoritesRouter({ usersFile, booksFile, readJSON, writeJSON, auth
     const users = readJSON(usersFile);
     const user = findUser(users, req.user.username);
     if (!user) return res.status(404).json({ message: 'User not found' });
-    const books = readJSON(booksFile);
-    const book = findBook(books, bookId);
-    if (!book) return res.status(404).json({ message: 'Book not found' });
     if (user.favorites.includes(bookId)) {
       return res.status(409).json({ message: 'Book already in favorites' });
     }
+    const books = readJSON(booksFile);
+    const book = findBook(books, bookId);
+    if (!book) return res.status(404).json({ message: 'Book not found' });
     user.favorites.push(bookId);
     writeJSON(usersFile, users);
     res.status(201).json({ message: 'Book added to favorites', book });

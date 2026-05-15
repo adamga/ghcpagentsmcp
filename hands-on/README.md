@@ -29,7 +29,8 @@ npm run setup
 cp .env.example .env
 cp frontend/.env.example frontend/.env
 npm run test:backend
-npm run build:frontend && npm run test:frontend
+npm run build:frontend
+npm run test:frontend
 ```
 
 If tests fail because ports are already in use, stop any existing backend or frontend development servers and rerun the commands.

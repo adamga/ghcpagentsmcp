@@ -39,7 +39,10 @@ function hashPassword(password) {
 
 function verifyPassword(password, user) {
   if (!user.passwordHash || !user.passwordSalt) {
-    return user.password === password;
+    if (typeof user.password !== 'string' || typeof password !== 'string') return false;
+    const expected = Buffer.from(user.password);
+    const actual = Buffer.from(password);
+    return expected.length === actual.length && crypto.timingSafeEqual(expected, actual);
   }
 
   const iterations = user.passwordIterations || PASSWORD_ITERATIONS;

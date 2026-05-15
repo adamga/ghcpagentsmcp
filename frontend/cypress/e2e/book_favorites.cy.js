@@ -47,7 +47,8 @@ describe('Book Favorites App', () => {
     cy.contains('h2', 'Books').should('exist');
     cy.get('input[name="book-search"]').type('orwell');
     cy.contains('George Orwell').should('exist');
-    cy.get('select').select('Author');
+    cy.get('select').first().select('Author');
+    cy.get('select').last().select('Descending');
     cy.get('button').contains('Add to Favorites').first().click();
     cy.get('button').contains('In Favorites').should('be.disabled');
     cy.get('a#favorites-link').click();

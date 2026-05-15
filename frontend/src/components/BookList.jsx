@@ -16,15 +16,16 @@ const BookList = () => {
   const favorites = useAppSelector(state => state.favorites.items);
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState('title');
+  const [order, setOrder] = useState('asc');
 
   useEffect(() => {
     if (!token) {
       navigate('/');
       return;
     }
-    dispatch(fetchBooks({ search, sort, order: 'asc' }));
+    dispatch(fetchBooks({ search, sort, order }));
     dispatch(fetchFavorites(token));
-  }, [dispatch, token, navigate, search, sort]);
+  }, [dispatch, token, navigate, search, sort, order]);
 
   const handleAddFavorite = async (bookId) => {
     if (!token) {
@@ -56,6 +57,13 @@ const BookList = () => {
           <select value={sort} onChange={e => setSort(e.target.value)}>
             <option value="title">Title</option>
             <option value="author">Author</option>
+          </select>
+        </label>
+        <label>
+          Direction
+          <select value={order} onChange={e => setOrder(e.target.value)}>
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
           </select>
         </label>
       </div>
